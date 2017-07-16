@@ -15,13 +15,6 @@ const (
 	LstdFlags     = log.LstdFlags
 )
 
-const (
-	TimeMinuteFormat = "200601021504"
-	TimeHourFormat   = "2006010215"
-	TimeDayFormat    = "20060102"
-	DefaultFormat    = TimeDayFormat
-)
-
 type logger struct {
 	l  *log.Logger
 	fd *os.File
