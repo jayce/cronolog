@@ -74,7 +74,6 @@ func (r *Rotater) rotate() (err error) {
 	}
 
 	err = os.MkdirAll(filepath.Dir(name), perm)
-	fmt.Println(filepath.Dir(name), err)
 	if err != nil {
 		return
 	}
@@ -85,7 +84,6 @@ func (r *Rotater) rotate() (err error) {
 	)
 
 	newfd, err = os.OpenFile(name, flag, perm)
-	fmt.Println(err)
 	if err != nil {
 		return
 	}
