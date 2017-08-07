@@ -10,6 +10,10 @@ import (
 
 var tmpdir = "./tmp"
 
+func initTMPDir() {
+	os.MkdirAll(tmpdir, 0666)
+}
+
 func removeTMPDir() error {
 	return os.RemoveAll(tmpdir)
 }

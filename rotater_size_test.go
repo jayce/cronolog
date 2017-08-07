@@ -1,7 +1,38 @@
 package cronolog
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+var (
+	testFile = tmpdir + "/test.log"
+)
 
 func TestRotaterSize(t *testing.T) {
+	initTMPDir()
+	defer removeTMPDir()
 
+	duplicate := 2
+	fileSize := 1024
+	buf := make([]byte, fileSize)
+
+	rSize, err := NewRotaterSize(testFile, "1kb", duplicate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 0; i < duplicate; i++ {
+		_, err = rSize.Write(buf)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	for i := 1; i <= duplicate; i++ {
+		name := fmt.Sprintf("%s.%d", testFile, i)
+		if !fileIsExist(name) {
+			t.Errorf("%s should be created, but isn't exist.", name)
+		}
+	}
 }

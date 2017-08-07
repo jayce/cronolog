@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	perm os.FileMode = 0664
+	perm     os.FileMode = 0664
+	fileflag int         = os.O_CREATE | os.O_WRONLY | os.O_APPEND
 )
 
 type Rotater struct {

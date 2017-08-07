@@ -1,9 +1,6 @@
 package cronolog
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 type Size int64
 
@@ -65,7 +62,6 @@ func fmtSize(buf []byte, s Size, unit Size) int {
 
 func (s Size) String() string {
 	var buf [32]byte
-
 	l := len(buf)
 	dup := s
 	negative := s < 0
@@ -108,79 +104,86 @@ var unitMap = map[string]Size{
 	"gb": GiB,
 }
 
-type postion struct {
-	negative bool // -
-	head     int  // 1
-	point    int  // .
-	tail     int  // 1
-	unit     int  // kb
+func isDigit(s byte) bool {
+	return s <= '9' && s >= '0'
 }
 
-func parse(s string) (p *postion, err error) {
-	length := len(s)
-	if length == 0 {
-		return nil, errors.New("empty string")
-	}
-
-	p = new(postion)
-	switch s[0] {
-	case '-':
-		p.negative = true
-		p.head++
-	case '+':
-		p.head++
-	}
-
-	for i := p.head; i < length; i++ {
-		if s[i] > '9' || s[i] < '0' {
-			if s[i] == '.' {
-				p.point = i
-			}
-			break
-		}
-		p.tail = i
-	}
-
-	return
-}
-
+// ParseSize strings: -1, 2.2b, 2
 func ParseSize(s string) (Size, error) {
-	p, err := parse(s)
-	if err != nil {
-		return 0, err
+	origin := s
+	length := len(origin)
+	if length < 2 {
+		return 0, errors.New("invalid " + s)
 	}
 
-	fmt.Printf("%s %#v", s, p)
+	negative := false
+	c := s[0]
+	if c == '-' || c == '+' {
+		s = s[1:]
+		negative = c == '-'
+	}
+
+	digit := cutDigit(s)
+	if digit == "" {
+		return 0, errors.New("invalid " + s)
+	}
 
 	var (
-		unit = Byte
-		size = int64(0)
-		head int
-		tail int
+		decimal string
+		unit    string
 	)
 
-	head = p.unit
-	if head > 0 {
-		v, ok := unitMap[s[head:]]
-		if !ok {
-			return 0, fmt.Errorf("invalid unit '%s'", s)
+	s = s[len(digit):]
+	if s[0] == '.' {
+		s = s[1:]
+		decimal = cutDigit(s)
+		if decimal == "" {
+			return 0, errors.New("invalid decimal " + s)
 		}
-		unit = v
+		unit = s[len(decimal):]
+	} else {
+		unit = s
 	}
 
-	head = p.head
-	tail = p.point
-	if tail > 0 {
-		tail--
-		digit := atoi(s[head:tail])
-		fmt.Println(digit, unit)
+	Unit := Byte
+	if unit != "" {
+		v, ok := unitMap[unit]
+		if !ok {
+			return 0, errors.New("invalid unit " + s)
+		}
+		Unit = v
 	}
 
-	if p.negative {
+	size := atoi(digit)
+	size *= int64(Unit)
+
+	if decimal != "" {
+		d := atoi(decimal)
+		d1 := float64(d) / float64(square(10, len(decimal)))
+		v := int64(d1 * (float64(Unit) / 1))
+		size += v
+	}
+
+	if negative {
 		size = -size
 	}
 
 	return Size(size), nil
+}
+
+func cutDigit(s string) string {
+	l := len(s)
+	if l == 1 && isDigit(s[0]) {
+		return s
+	}
+
+	for i := 0; i < l; i++ {
+		if !isDigit(s[i]) {
+			return s[:i]
+		}
+	}
+
+	return ""
 }
 
 func atoi(s string) int64 {

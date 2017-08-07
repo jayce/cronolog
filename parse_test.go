@@ -33,7 +33,7 @@ func TestParseSize(t *testing.T) {
 	}{
 		{"-1.2", "-1b"},
 		{"-1.2b", "-1b"},
-		{"1.2kb", "1.2kb"},
+		{"1.2kb", "1.19kb"},
 		{"1mb", "1mb"},
 		{"1.3245gb", "1.32gb"},
 	}
@@ -51,6 +51,7 @@ func TestParseSize(t *testing.T) {
 
 	bads := []string{
 		"-1..1b",
+		"-1.b",
 		"--1.1b",
 		".000b",
 		"asd",
