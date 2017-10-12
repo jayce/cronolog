@@ -24,12 +24,15 @@ const (
 	LDebug Level = 0x0
 	LWarn  Level = 0x1
 	LError Level = 0x2
+	LAlert Level = 0x3
 )
 
 func StringToLevel(level string) Level {
 	switch level {
+	case "alert":
+		return LAlert
 	case "error":
-		return LDebug
+		return LError
 	case "warn":
 		return LWarn
 	case "debug":
@@ -46,6 +49,8 @@ func LevelToString(level Level) string {
 		return "warn"
 	case LError:
 		return "error"
+	case LAlert:
+		return "alert"
 	}
 	return "debug"
 }
@@ -85,6 +90,10 @@ func (l *logger) Error(v ...interface{}) {
 	l.log(LError, v...)
 }
 
+func (l *logger) Alert(v ...interface{}) {
+	l.log(LAlert, v...)
+}
+
 func (l *logger) isOutput(level Level) bool {
 	return l.level > level
 }
@@ -110,6 +119,10 @@ func (l *logger) Errorf(format string, v ...interface{}) {
 	l.logf(LError, format, v...)
 }
 
+func (l *logger) Alertf(format string, v ...interface{}) {
+	l.logf(LAlert, format, v...)
+}
+
 func (l *logger) logf(level Level, format string, v ...interface{}) {
 	if l.isOutput(level) {
 		return
@@ -120,6 +133,10 @@ func (l *logger) logf(level Level, format string, v ...interface{}) {
 }
 
 var stderr = NewLogger(os.Stderr, "", log.LstdFlags)
+
+func SetOutput(out io.Writer) {
+	stderr.SetOutput(out)
+}
 
 func SetLevel(level Level) {
 	stderr.SetLevel(level)
@@ -137,6 +154,10 @@ func Error(v ...interface{}) {
 	stderr.Error(v...)
 }
 
+func Alert(v ...interface{}) {
+	stderr.Alert(v...)
+}
+
 func Debugf(format string, v ...interface{}) {
 	stderr.Debugf(format, v...)
 }
@@ -147,4 +168,8 @@ func Warnf(format string, v ...interface{}) {
 
 func Errorf(format string, v ...interface{}) {
 	stderr.Errorf(format, v...)
+}
+
+func Alertf(format string, v ...interface{}) {
+	stderr.Alertf(format, v...)
 }
