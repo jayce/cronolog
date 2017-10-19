@@ -20,13 +20,13 @@ type Rotater struct {
 	fd     *os.File
 
 	layout   string
-	lastname string // Last file name
-	rotates  int    // Number of rotations
-	isRotate bool   // Whether to rotate
+	lastname string
+	backlogs int
+	isRotate bool // Whether to rotate
 }
 
 // NewRotater create a rotater for time period
-func NewRotater(layout, period string) (r *Rotater, err error) {
+func NewRotater(layout, period string, backlogs int) (r *Rotater, err error) {
 	var perd time.Duration
 
 	perd, err = time.ParseDuration(period)
@@ -34,8 +34,13 @@ func NewRotater(layout, period string) (r *Rotater, err error) {
 		return
 	}
 
-	if perd < 1*time.Second {
-		err = fmt.Errorf("period less then %s", time.Second)
+	if perd < time.Second {
+		err = fmt.Errorf("period must be great then %s", time.Second)
+		return
+	}
+
+	if backlogs < 0 {
+		err = fmt.Errorf("backlogs must be great then 0")
 		return
 	}
 
@@ -62,6 +67,7 @@ func NewRotater(layout, period string) (r *Rotater, err error) {
 		period:   perd,
 		layout:   layout,
 		isRotate: true,
+		backlogs: backlogs,
 	}
 
 	return
@@ -99,9 +105,23 @@ func (r *Rotater) rotate() (err error) {
 	r.fd = newfd
 	r.lastname = name
 	r.isRotate = false
-	r.rotates++
 
-	return err
+	return r.deleteBacklog(r.backlogs)
+}
+
+func (r *Rotater) deleteBacklog(backlog int) error {
+	if backlog == 0 {
+		return nil
+	}
+
+	date, _ := alignTime(r.period)
+	since := r.period * time.Duration(backlog)
+	past := date.Add(-since)
+	name := past.Format(r.layout)
+	if _, err := os.Stat(name); !os.IsNotExist(err) {
+		return os.Remove(name)
+	}
+	return nil
 }
 
 // Write: implements io.Writer

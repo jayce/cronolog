@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	rotater, err := clog.NewRotater("cronolog/2006010215.log", "24h")
+	rotater, err := clog.NewRotater("cronolog/2006010215.log", "24h", 0)
 
 	if err != nil {
 		fmt.Println(err)

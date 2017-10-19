@@ -5,13 +5,11 @@ import (
 	"testing"
 )
 
-var (
-	testFile = tmpdir + "/test.log"
-)
-
 func TestRotaterSize(t *testing.T) {
 	initTMPDir()
 	defer removeTMPDir()
+
+	testFile := tmpdir + "/test.log"
 
 	duplicate := 2
 	fileSize := 1024
@@ -21,6 +19,7 @@ func TestRotaterSize(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer rSize.Close()
 
 	for i := 0; i < duplicate; i++ {
 		_, err = rSize.Write(buf)
