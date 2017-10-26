@@ -25,10 +25,21 @@ func main() {
 	}
 
 	logger := clog.NewLogger(rotater, "", clog.LstdFlags)
-	logger.SetLevel(clog.LError)
+	logger.SetLevel(clog.LWarn)
 
 	logger.Debug("debug infomation")
 	logger.Warn("Warn infomation")
 	logger.Error("Error infomation")
+
+	// output:
+	// 2017/10/24 01:00:31 main.go:19 [warn] "Warn infomation"
+	// 2017/10/24 01:00:31 main.go:20 [error] "Warn infomation"
+
+	plog := clog.NewScope("Cache")
+
+	plog.Warn("Warn infomation")
+
+	// output:
+	// 2017/10/24 01:00:31 main.go:20 [warn] Cache: Warn infomation
 }
 ```

@@ -3,11 +3,12 @@ package cronolog
 import (
 	"bytes"
 	"io"
+	"io/ioutil"
 	"testing"
 )
 
 var buf = bytes.NewBuffer(make([]byte, 4096))
-var blog = NewLogger(buf, "", 0)
+var blog = NewLogger(buf, 0)
 
 func checkBuf(n int) (bool, int) {
 	for {
@@ -44,5 +45,12 @@ func TestLogger(t *testing.T) {
 
 	if ok, n := checkBuf(3); !ok {
 		t.Errorf("There shold be 3 messages, but found %d", n)
+	}
+}
+
+func BenchmarkLogger(b *testing.B) {
+	clog := NewLogger(ioutil.Discard, Lshortfile|LstdFlags)
+	for i := 0; i < b.N; i++ {
+		clog.Debug("test", "teste", "test1")
 	}
 }

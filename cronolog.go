@@ -55,15 +55,17 @@ func LevelToString(level Level) string {
 	return "debug"
 }
 
+const calldep = 2
+
 type logger struct {
 	l     *log.Logger
 	mux   sync.Mutex
 	level Level
 }
 
-func NewLogger(out io.Writer, prefix string, flag int) *logger {
+func NewLogger(out io.Writer, flags int) *logger {
 	return &logger{
-		l:     log.New(out, prefix, flag),
+		l:     log.New(out, "", flags),
 		level: LDebug,
 	}
 }
@@ -78,61 +80,121 @@ func (l *logger) SetOutput(w io.Writer) {
 	l.l.SetOutput(w)
 }
 
+func (l *logger) SetFlags(flags int) {
+	l.l.SetFlags(flags)
+}
+
 func (l *logger) Debug(v ...interface{}) {
-	l.log(LDebug, v...)
+	l.log(calldep, LDebug, v...)
 }
 
 func (l *logger) Warn(v ...interface{}) {
-	l.log(LWarn, v...)
+	l.log(calldep, LWarn, v...)
 }
 
 func (l *logger) Error(v ...interface{}) {
-	l.log(LError, v...)
+	l.log(calldep, LError, v...)
 }
 
 func (l *logger) Alert(v ...interface{}) {
-	l.log(LAlert, v...)
+	l.log(calldep, LAlert, v...)
 }
 
 func (l *logger) isOutput(level Level) bool {
 	return l.level > level
 }
 
-func (l *logger) log(level Level, v ...interface{}) {
+func (l *logger) log(calldep int, level Level, v ...interface{}) {
 	if l.isOutput(level) {
 		return
 	}
 
-	s := "[" + LevelToString(l.level) + "] " + fmt.Sprintln(v...)
-	l.l.Output(4, s)
+	buf := fmt.Sprintf("[%s] ", LevelToString(level)) + fmt.Sprintln(v...)
+	l.l.Output(calldep+1, buf)
+}
+
+func (l *logger) logf(calldep int, level Level, format string, v ...interface{}) {
+	if l.isOutput(level) {
+		return
+	}
+
+	l.log(calldep+1, level, fmt.Sprintf(format, v...))
 }
 
 func (l *logger) Debugf(format string, v ...interface{}) {
-	l.logf(LDebug, format, v...)
+	l.logf(calldep, LDebug, format, v...)
 }
 
 func (l *logger) Warnf(format string, v ...interface{}) {
-	l.logf(LWarn, format, v...)
+	l.logf(calldep, LWarn, format, v...)
 }
 
 func (l *logger) Errorf(format string, v ...interface{}) {
-	l.logf(LError, format, v...)
+	l.logf(calldep, LError, format, v...)
 }
 
 func (l *logger) Alertf(format string, v ...interface{}) {
-	l.logf(LAlert, format, v...)
+	l.logf(calldep, LAlert, format, v...)
 }
 
-func (l *logger) logf(level Level, format string, v ...interface{}) {
-	if l.isOutput(level) {
+func (l *logger) NewScope(s string) *scope {
+	return &scope{
+		l: l,
+		s: s,
+	}
+}
+
+type scope struct {
+	l *logger
+	s string
+}
+
+func (s *scope) log(level Level, v ...interface{}) {
+	if s.l.isOutput(level) {
 		return
 	}
 
-	s := "[" + LevelToString(l.level) + "] " + fmt.Sprintf(format, v...)
-	l.l.Output(4, s)
+	buf := fmt.Sprintf("[%s] %s: ", LevelToString(level), s.s) + fmt.Sprintln(v...)
+	s.l.l.Output(calldep+1, buf)
 }
 
-var stderr = NewLogger(os.Stderr, "", log.LstdFlags)
+func (s *scope) Debug(v ...interface{}) {
+	s.log(LDebug, fmt.Sprint(v...))
+}
+
+func (s *scope) Warn(v ...interface{}) {
+	s.log(LWarn, fmt.Sprint(v...))
+}
+
+func (s *scope) Error(v ...interface{}) {
+	s.log(LError, fmt.Sprint(v...))
+}
+
+func (s *scope) Alert(v ...interface{}) {
+	s.log(LAlert, fmt.Sprint(v...))
+}
+
+func (s *scope) Debugf(format string, v ...interface{}) {
+	s.log(LDebug, fmt.Sprintf(format, v...))
+}
+
+func (s *scope) Warnf(format string, v ...interface{}) {
+	s.log(LWarn, fmt.Sprintf(format, v...))
+}
+
+func (s *scope) Errorf(format string, v ...interface{}) {
+	s.log(LError, fmt.Sprintf(format, v...))
+}
+
+func (s *scope) Alertf(format string, v ...interface{}) {
+	s.log(LAlert, fmt.Sprintf(format, v...))
+}
+
+var stderr = NewLogger(os.Stderr, log.LstdFlags)
+
+func NewScope(scope string) *scope {
+	return stderr.NewScope(scope)
+}
 
 func SetOutput(out io.Writer) {
 	stderr.SetOutput(out)
@@ -142,34 +204,38 @@ func SetLevel(level Level) {
 	stderr.SetLevel(level)
 }
 
+func SetFlags(flags int) {
+	stderr.SetFlags(flags)
+}
+
 func Debug(v ...interface{}) {
-	stderr.Debug(v...)
+	stderr.log(calldep, LDebug, v...)
 }
 
 func Warn(v ...interface{}) {
-	stderr.Warn(v...)
+	stderr.log(calldep, LWarn, v...)
 }
 
 func Error(v ...interface{}) {
-	stderr.Error(v...)
+	stderr.log(calldep, LError, v...)
 }
 
 func Alert(v ...interface{}) {
-	stderr.Alert(v...)
+	stderr.log(calldep, LAlert, v...)
 }
 
 func Debugf(format string, v ...interface{}) {
-	stderr.Debugf(format, v...)
+	stderr.logf(calldep, LDebug, format, v...)
 }
 
 func Warnf(format string, v ...interface{}) {
-	stderr.Warnf(format, v...)
+	stderr.logf(calldep, LWarn, format, v...)
 }
 
 func Errorf(format string, v ...interface{}) {
-	stderr.Errorf(format, v...)
+	stderr.logf(calldep, LError, format, v...)
 }
 
 func Alertf(format string, v ...interface{}) {
-	stderr.Alertf(format, v...)
+	stderr.logf(calldep, LAlert, format, v...)
 }
