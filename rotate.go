@@ -44,6 +44,11 @@ func NewRotater(layout, period string, backlogs int) (r *Rotater, err error) {
 		return
 	}
 
+	layout, err = UnixToGolang(layout)
+	if err != nil {
+		return
+	}
+
 	date, since := alignTime(perd)
 
 	file := date.Format(layout)

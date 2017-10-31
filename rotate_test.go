@@ -37,7 +37,7 @@ func TestRotate(t *testing.T) {
 	initTMPDir()
 	defer removeTMPDir()
 
-	tmpFile := path.Join(tmpdir, "/t-20060102150405.log")
+	tmpFile := path.Join(tmpdir, "/t-%Y%m%d%H%M%S.log")
 	period := "1s"
 
 	rt, err := NewRotater(tmpFile, period, 0)

@@ -3,6 +3,11 @@ Cronolog
 
 a simple logging lib for Go, with rotating file.
 
+Feature
+-------
+
+- [x] Rotater: Spport part of the unix time-format, like: '%Y%m%d%H%M%S'.
+
 Usage
 -----
 
@@ -18,6 +23,8 @@ import (
 
 func main() {
 	rotater, err := clog.NewRotater("cronolog/2006010215.log", "24h", 0)
+	// or
+	// rotater, err := clog.NewRotater("cronolog/%Y%m%d%H.log", "24h", 0)
 
 	if err != nil {
 		fmt.Println(err)
