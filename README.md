@@ -6,7 +6,8 @@ a simple logging lib for Go, with rotating file.
 Feature
 -------
 
-- [x] Rotater: Spport part of the unix time-format, like: '%Y%m%d%H%M%S'.
+- [x] Rotater: Support part of the unix time-format, like: '%Y%m%d%H%M%S'.
+- [x] Level: `debug`, `info`, `warn`, `error`, `alert`.
 
 Usage
 -----

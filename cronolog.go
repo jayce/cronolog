@@ -21,10 +21,11 @@ const (
 type Level int
 
 const (
-	LDebug Level = 0x0
-	LWarn  Level = 0x1
-	LError Level = 0x2
-	LAlert Level = 0x3
+	LDebug = iota + Level(0)
+	Linfo
+	LWarn
+	LError
+	LAlert
 )
 
 func StringToLevel(level string) Level {
@@ -35,6 +36,8 @@ func StringToLevel(level string) Level {
 		return LError
 	case "warn":
 		return LWarn
+	case "info":
+		return Linfo
 	case "debug":
 		return LDebug
 	}
@@ -45,6 +48,8 @@ func LevelToString(level Level) string {
 	switch level {
 	case LDebug:
 		return "debug"
+	case Linfo:
+		return "info"
 	case LWarn:
 		return "warn"
 	case LError:
@@ -66,7 +71,7 @@ type logger struct {
 func NewLogger(out io.Writer, flags int) *logger {
 	return &logger{
 		l:     log.New(out, "", flags),
-		level: LDebug,
+		level: Linfo,
 	}
 }
 
@@ -86,6 +91,10 @@ func (l *logger) SetFlags(flags int) {
 
 func (l *logger) Debug(v ...interface{}) {
 	l.log(calldep, LDebug, v...)
+}
+
+func (l *logger) Info(v ...interface{}) {
+	l.log(calldep, Linfo, v...)
 }
 
 func (l *logger) Warn(v ...interface{}) {
@@ -125,6 +134,10 @@ func (l *logger) Debugf(format string, v ...interface{}) {
 	l.logf(calldep, LDebug, format, v...)
 }
 
+func (l *logger) Infof(format string, v ...interface{}) {
+	l.logf(calldep, Linfo, format, v...)
+}
+
 func (l *logger) Warnf(format string, v ...interface{}) {
 	l.logf(calldep, LWarn, format, v...)
 }
@@ -162,6 +175,10 @@ func (s *scope) Debug(v ...interface{}) {
 	s.log(LDebug, fmt.Sprint(v...))
 }
 
+func (s *scope) Info(v ...interface{}) {
+	s.log(Linfo, fmt.Sprint(v...))
+}
+
 func (s *scope) Warn(v ...interface{}) {
 	s.log(LWarn, fmt.Sprint(v...))
 }
@@ -175,6 +192,10 @@ func (s *scope) Alert(v ...interface{}) {
 }
 
 func (s *scope) Debugf(format string, v ...interface{}) {
+	s.log(LDebug, fmt.Sprintf(format, v...))
+}
+
+func (s *scope) Infof(format string, v ...interface{}) {
 	s.log(LDebug, fmt.Sprintf(format, v...))
 }
 
@@ -212,6 +233,10 @@ func Debug(v ...interface{}) {
 	stderr.log(calldep, LDebug, v...)
 }
 
+func Info(v ...interface{}) {
+	stderr.log(calldep, Linfo, v...)
+}
+
 func Warn(v ...interface{}) {
 	stderr.log(calldep, LWarn, v...)
 }
@@ -226,6 +251,10 @@ func Alert(v ...interface{}) {
 
 func Debugf(format string, v ...interface{}) {
 	stderr.logf(calldep, LDebug, format, v...)
+}
+
+func Infof(format string, v ...interface{}) {
+	stderr.logf(calldep, Linfo, format, v...)
 }
 
 func Warnf(format string, v ...interface{}) {
