@@ -196,7 +196,7 @@ func (s *scope) Debugf(format string, v ...interface{}) {
 }
 
 func (s *scope) Infof(format string, v ...interface{}) {
-	s.log(LDebug, fmt.Sprintf(format, v...))
+	s.log(Linfo, fmt.Sprintf(format, v...))
 }
 
 func (s *scope) Warnf(format string, v ...interface{}) {
