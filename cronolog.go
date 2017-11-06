@@ -22,7 +22,7 @@ type Level int
 
 const (
 	LDebug = iota + Level(0)
-	Linfo
+	LInfo
 	LWarn
 	LError
 	LAlert
@@ -37,7 +37,7 @@ func StringToLevel(level string) Level {
 	case "warn":
 		return LWarn
 	case "info":
-		return Linfo
+		return LInfo
 	case "debug":
 		return LDebug
 	}
@@ -48,7 +48,7 @@ func LevelToString(level Level) string {
 	switch level {
 	case LDebug:
 		return "debug"
-	case Linfo:
+	case LInfo:
 		return "info"
 	case LWarn:
 		return "warn"
@@ -71,7 +71,7 @@ type logger struct {
 func NewLogger(out io.Writer, flags int) *logger {
 	return &logger{
 		l:     log.New(out, "", flags),
-		level: Linfo,
+		level: LInfo,
 	}
 }
 
@@ -94,7 +94,7 @@ func (l *logger) Debug(v ...interface{}) {
 }
 
 func (l *logger) Info(v ...interface{}) {
-	l.log(calldep, Linfo, v...)
+	l.log(calldep, LInfo, v...)
 }
 
 func (l *logger) Warn(v ...interface{}) {
@@ -135,7 +135,7 @@ func (l *logger) Debugf(format string, v ...interface{}) {
 }
 
 func (l *logger) Infof(format string, v ...interface{}) {
-	l.logf(calldep, Linfo, format, v...)
+	l.logf(calldep, LInfo, format, v...)
 }
 
 func (l *logger) Warnf(format string, v ...interface{}) {
@@ -176,7 +176,7 @@ func (s *scope) Debug(v ...interface{}) {
 }
 
 func (s *scope) Info(v ...interface{}) {
-	s.log(Linfo, fmt.Sprint(v...))
+	s.log(LInfo, fmt.Sprint(v...))
 }
 
 func (s *scope) Warn(v ...interface{}) {
@@ -196,7 +196,7 @@ func (s *scope) Debugf(format string, v ...interface{}) {
 }
 
 func (s *scope) Infof(format string, v ...interface{}) {
-	s.log(Linfo, fmt.Sprintf(format, v...))
+	s.log(LInfo, fmt.Sprintf(format, v...))
 }
 
 func (s *scope) Warnf(format string, v ...interface{}) {
@@ -234,7 +234,7 @@ func Debug(v ...interface{}) {
 }
 
 func Info(v ...interface{}) {
-	stderr.log(calldep, Linfo, v...)
+	stderr.log(calldep, LInfo, v...)
 }
 
 func Warn(v ...interface{}) {
@@ -254,7 +254,7 @@ func Debugf(format string, v ...interface{}) {
 }
 
 func Infof(format string, v ...interface{}) {
-	stderr.logf(calldep, Linfo, format, v...)
+	stderr.logf(calldep, LInfo, format, v...)
 }
 
 func Warnf(format string, v ...interface{}) {
