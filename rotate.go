@@ -123,6 +123,11 @@ func (r *Rotater) deleteBacklog(backlog int) error {
 	since := r.period * time.Duration(backlog)
 	past := date.Add(-since)
 	name := past.Format(r.layout)
+
+	if r.lastname == name {
+		return nil
+	}
+
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
 		return os.Remove(name)
 	}
