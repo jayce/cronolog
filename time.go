@@ -1,6 +1,9 @@
 package cronolog
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 var flagsMap = map[string]string{
 	"%": "%",
@@ -22,20 +25,20 @@ var flagsMap = map[string]string{
 	"Y": "2006", "y": "06",
 }
 
-func UnixToGolang(f string) (string, error) {
+func UnixToGolang(layout string, t time.Time) (string, error) {
 	newf := ""
-	w := len(f)
+	w := len(layout)
 	flag := false
 
 	for i := 0; i < w; i++ {
-		c := string(f[i])
+		c := string(layout[i])
 
 		switch {
 		case flag == true:
 			if v, ok := flagsMap[c]; ok {
-				newf += v
+				newf += t.Format(v)
 			} else {
-				return "", fmt.Errorf("'%s: not support '%s'", f, "%"+c)
+				return "", fmt.Errorf("'%s: not support '%s'", layout, "%"+c)
 			}
 			flag = false
 		case c == "%":

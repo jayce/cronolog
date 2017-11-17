@@ -63,7 +63,7 @@ func TestBacklogs(t *testing.T) {
 	initTMPDir()
 	defer removeTMPDir()
 
-	tmpFile := path.Join(tmpdir, "/backlog-20060102150405.log")
+	tmpFile := path.Join(tmpdir, "/backlog-%Y%m%d%H%M%S.log")
 	backlogs := 3
 	period := "1s"
 	r, err := NewRotater(tmpFile, period, backlogs)

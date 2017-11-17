@@ -44,14 +44,13 @@ func NewRotater(layout, period string, backlogs int) (r *Rotater, err error) {
 		return
 	}
 
-	layout, err = UnixToGolang(layout)
+	date, since := alignTime(perd)
+
+	file, err := UnixToGolang(layout, date)
 	if err != nil {
 		return
 	}
 
-	date, since := alignTime(perd)
-
-	file := date.Format(layout)
 	if len(file) > 0 &&
 		(file[len(file)-1] == '.' ||
 			file[len(file)-1] == '/') {
@@ -80,7 +79,7 @@ func NewRotater(layout, period string, backlogs int) (r *Rotater, err error) {
 
 func (r *Rotater) rotate() (err error) {
 	date, _ := alignTime(r.period)
-	name := date.Format(r.layout)
+	name, _ := UnixToGolang(r.layout, date)
 	if r.lastname == name {
 		return
 	}
@@ -122,7 +121,7 @@ func (r *Rotater) deleteBacklog(backlog int) error {
 	date, _ := alignTime(r.period)
 	since := r.period * time.Duration(backlog)
 	past := date.Add(-since)
-	name := past.Format(r.layout)
+	name, _ := UnixToGolang(r.layout, past)
 
 	if r.lastname == name {
 		return nil
