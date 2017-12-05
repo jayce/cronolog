@@ -78,6 +78,8 @@ func NewRotater(layout, period string, backlogs int) (r *Rotater, err error) {
 }
 
 func (r *Rotater) rotate() (err error) {
+	r.isRotate = false
+
 	date, _ := alignTime(r.period)
 	name, _ := UnixToGolang(r.layout, date)
 	if r.lastname == name {
@@ -99,16 +101,12 @@ func (r *Rotater) rotate() (err error) {
 		return
 	}
 
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
 	if r.fd != nil {
 		r.fd.Close()
 	}
 
 	r.fd = newfd
 	r.lastname = name
-	r.isRotate = false
 
 	return r.deleteBacklog(r.backlogs)
 }
@@ -135,6 +133,9 @@ func (r *Rotater) deleteBacklog(backlog int) error {
 
 // Write: implements io.Writer
 func (r *Rotater) Write(p []byte) (n int, err error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
 	if r.isRotate {
 		if err = r.rotate(); err != nil {
 			return
