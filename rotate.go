@@ -159,6 +159,7 @@ func (r *Rotater) Close() error {
 
 func alignTime(period time.Duration) (time.Time, time.Duration) {
 	date := time.Now()
-	since := time.Duration(date.UnixNano()) % period
-	return date.Add(-since), since
+	_, offset := date.Zone()
+	since := time.Duration(date.Unix()+int64(offset)) * time.Second % period
+	return date.Add(-since), period - since
 }
